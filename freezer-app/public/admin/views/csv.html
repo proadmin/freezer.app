@@ -12,6 +12,7 @@
 <body>
   <div class="freezer-inventory-wrap">
     <div class="freezer-inventory-container">
+      <a href="/admin" class="back-link">← Back to Inventory</a>
       <header class="freezer-inventory-header">
         <h1>CSV Import / Export</h1>
         <p class="subtitle">Import and export your freezer inventory as CSV files</p>
@@ -20,13 +21,17 @@
       <main class="freezer-inventory-main">
         <section class="form-section">
           <h2>Export CSV</h2>
-          <p>Download your current inventory as a CSV file.</p>
-          <button type="button" id="downloadCsvBtn" class="btn btn-csv">Export CSV</button>
+          <p>Download your current inventory as a CSV file. Check the box to export all admin tables (categories, freezers, locations, item names) as a zip archive.</p>
+          <div style="margin-bottom:10px">
+            <label><input type="checkbox" id="exportAdminTables"> Include admin tables (export as .zip)</label>
+          </div>
+          <button type="button" id="downloadCsvBtn" class="btn btn-csv">Export</button>
         </section>
 
         <section class="form-section">
-          <h2>Import CSV</h2>
-          <p><strong>Warning:</strong> Importing a CSV will <strong>replace all</strong> current inventory items. This cannot be undone.</p>
+          <h2>Import CSV or Zip</h2>
+          <p><strong>Warning:</strong> Importing will <strong>replace all</strong> current data for each table present in the file. This cannot be undone.</p>
+          <p>Import a single <code>.csv</code> file to replace inventory items, or a <code>.zip</code> file (exported from this page) to replace all admin tables.</p>
           <div class="csv-columns-table-wrap">
             <table class="inventory-table csv-columns-table">
               <thead>
@@ -47,8 +52,8 @@
             </table>
           </div>
           <div class="csv-import-area">
-            <label class="btn btn-import" for="csvFileInput">Choose CSV File to Import</label>
-            <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+            <label class="btn btn-import" for="csvFileInput">Choose File to Import</label>
+            <input type="file" id="csvFileInput" accept=".csv,.zip" style="display:none">
             <span id="csvFileName" class="csv-file-name"></span>
           </div>
         </section>

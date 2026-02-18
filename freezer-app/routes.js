@@ -4,6 +4,7 @@ const db = require('./db');
 const multer = require('multer');
 const upload = multer();
 const { parse } = require('csv-parse/sync');
+const AdmZip = require('adm-zip');
 
 // Items
 router.get('/items', (req, res) => {
@@ -36,9 +37,69 @@ router.put('/items/:id', express.json(), (req, res) => {
 router.post('/items/import-csv', upload.single('file'), (req, res) => {
   if (!req.file || !req.file.buffer) return res.status(400).json({ error: 'No file uploaded.' });
   try {
+    const isZip = req.file.originalname.toLowerCase().endsWith('.zip') ||
+                  req.file.mimetype === 'application/zip' ||
+                  req.file.mimetype === 'application/x-zip-compressed';
+
+    if (isZip) {
+      const zip = new AdmZip(req.file.buffer);
+      const result = {};
+
+      const getEntry = (name) => {
+        const e = zip.getEntry(name);
+        return e ? e.getData().toString('utf8') : null;
+      };
+
+      const parseNormalized = (text) => {
+        const records = parse(text, { columns: true, skip_empty_lines: true });
+        return records.map(r => {
+          const obj = {};
+          for (const k of Object.keys(r)) {
+            const lower = k.trim().toLowerCase();
+            const key = (lower === 'month added' || lower === 'date added') ? 'date_added' : lower;
+            obj[key] = r[k];
+          }
+          return obj;
+        });
+      };
+
+      const inv = getEntry('inventory.csv');
+      if (inv) result.inventory = db.replaceAllItems(parseNormalized(inv));
+
+      const cats = getEntry('categories.csv');
+      if (cats) {
+        const rows = parse(cats, { columns: true, skip_empty_lines: true });
+        result.categories = db.replaceAllCategories(rows.map(r => r.Name || r.name));
+      }
+
+      const frzs = getEntry('freezers.csv');
+      if (frzs) {
+        const rows = parse(frzs, { columns: true, skip_empty_lines: true });
+        result.freezers = db.replaceAllFreezers(rows.map(r => r.Name || r.name));
+      }
+
+      const locs = getEntry('locations.csv');
+      if (locs) {
+        const rows = parse(locs, { columns: true, skip_empty_lines: true });
+        result.locations = db.replaceAllLocations(rows.map(r => ({
+          freezer: r.Freezer || r.freezer,
+          shelf: r.Shelf || r.shelf,
+          bin: r.Bin || r.bin || '',
+        })));
+      }
+
+      const inames = getEntry('item-names.csv');
+      if (inames) {
+        const rows = parse(inames, { columns: true, skip_empty_lines: true });
+        result.item_names = db.replaceAllItemNames(rows.map(r => r.Name || r.name));
+      }
+
+      return res.json({ imported: result });
+    }
+
+    // Plain CSV — inventory only
     const text = req.file.buffer.toString('utf8');
     const records = parse(text, { columns: true, skip_empty_lines: true });
-    // normalize headers
     const mapped = records.map(r => {
       const obj = {};
       for (const k of Object.keys(r)) {
@@ -53,18 +114,49 @@ router.post('/items/import-csv', upload.single('file'), (req, res) => {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
-router.get('/items/export-csv', (req, res) => {
-  const items = db.getItems();
+function buildInventoryCsv(items) {
   const header = ['Name','Category','Quantity','Unit','Freezer','Shelf','Bin','Preparation','Month Added','Notes'];
   const lines = [header.join(',')];
   for (const it of items) {
-    const row = [it.name, it.category, it.quantity, it.unit || '', it.freezer||'', it.shelf||'', it.bin||'', it.preparation||'', new Date(it.date_added).toLocaleString('en-US',{year:'numeric',month:'short'}), it.notes||''];
-    // CSV quoting
-    const quoted = row.map(v => '"' + String(v).replace(/"/g,'""') + '"');
-    lines.push(quoted.join(','));
+    const row = [it.name, it.category, it.quantity, it.unit||'', it.freezer||'', it.shelf||'', it.bin||'', it.preparation||'', new Date(it.date_added).toLocaleString('en-US',{year:'numeric',month:'short'}), it.notes||''];
+    lines.push(row.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','));
   }
-  const csv = lines.join('\n');
-  res.json({ csv, filename: `freezer-inventory-${new Date().toISOString().slice(0,10)}.csv` });
+  return lines.join('\n');
+}
+
+router.get('/items/export-csv', (req, res) => {
+  const dateStr = new Date().toISOString().slice(0,10);
+  if (req.query.include === 'admin') {
+    const zip = new AdmZip();
+
+    zip.addFile('inventory.csv', Buffer.from(buildInventoryCsv(db.getItems()), 'utf8'));
+
+    const cats = db.getCategories();
+    const catCsv = 'Name\n' + cats.map(c => '"' + c.name.replace(/"/g,'""') + '"').join('\n');
+    zip.addFile('categories.csv', Buffer.from(catCsv, 'utf8'));
+
+    const frzs = db.getFreezers();
+    const frzCsv = 'Name\n' + frzs.map(f => '"' + f.name.replace(/"/g,'""') + '"').join('\n');
+    zip.addFile('freezers.csv', Buffer.from(frzCsv, 'utf8'));
+
+    const locs = db.getLocations();
+    const locLines = ['Freezer,Shelf,Bin'];
+    for (const l of locs) locLines.push([l.freezer, l.shelf, l.bin||''].map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','));
+    zip.addFile('locations.csv', Buffer.from(locLines.join('\n'), 'utf8'));
+
+    const inames = db.getItemNames();
+    const inameCsv = 'Name\n' + inames.map(n => '"' + n.name.replace(/"/g,'""') + '"').join('\n');
+    zip.addFile('item-names.csv', Buffer.from(inameCsv, 'utf8'));
+
+    const buf = zip.toBuffer();
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="freezer-inventory-${dateStr}.zip"`);
+    res.setHeader('Content-Length', buf.length);
+    return res.end(buf);
+  }
+
+  const csv = buildInventoryCsv(db.getItems());
+  res.json({ csv, filename: `freezer-inventory-${dateStr}.csv` });
 });
 
 // Locations

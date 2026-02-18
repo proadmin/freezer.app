@@ -158,17 +158,16 @@
         itemDate.value = yyyy + '-' + mm;
     }
 
-    // --- Category select ---
+    // --- Category datalist ---
 
     function populateAddCategories() {
-        var sel = document.getElementById('itemCategory');
-        if (!sel) return;
-        sel.innerHTML = '<option value="">Select category</option>';
+        var datalist = document.getElementById('categoryList');
+        if (!datalist) return;
+        datalist.innerHTML = '';
         CATEGORIES.forEach(function(cat) {
             var opt = document.createElement('option');
             opt.value = cat;
-            opt.textContent = cat;
-            sel.appendChild(opt);
+            datalist.appendChild(opt);
         });
     }
 
@@ -193,6 +192,33 @@
                 populateItemNameList();
             })
             .catch(function() {});
+    }
+
+    function refreshCategories() {
+        fetch(API_BASE + '/categories', { headers: headers() })
+            .then(function(r) { return r.ok ? r.json() : []; })
+            .then(function(data) {
+                CATEGORIES_RAW = data;
+                CATEGORIES = data.map(function(c) { return c.name; });
+                populateAddCategories();
+                updateFilters();
+            })
+            .catch(function() {});
+    }
+
+    function loadReferenceData() {
+        return Promise.all([
+            fetch(API_BASE + '/freezers', { headers: headers() }).then(function(r) { return r.ok ? r.json() : []; }),
+            fetch(API_BASE + '/locations', { headers: headers() }).then(function(r) { return r.ok ? r.json() : []; }),
+            fetch(API_BASE + '/categories', { headers: headers() }).then(function(r) { return r.ok ? r.json() : []; }),
+            fetch(API_BASE + '/item-names', { headers: headers() }).then(function(r) { return r.ok ? r.json() : []; }),
+        ]).then(function(results) {
+            FREEZERS = results[0];
+            LOCATIONS = results[1];
+            CATEGORIES_RAW = results[2];
+            CATEGORIES = CATEGORIES_RAW.map(function(c) { return c.name; });
+            ITEM_NAMES = results[3];
+        }).catch(function() {});
     }
 
     // --- Add form cascade ---
@@ -328,6 +354,7 @@
                 updateStats();
                 showSuccess('Item added successfully!');
                 refreshItemNames();
+                refreshCategories();
             })
             .catch(function(err) {
                 showError('Failed to add item: ' + err.message);
@@ -968,13 +995,16 @@
             .catch(function() { showError('Failed to export CSV.'); });
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
+    function init() {
+        loadReferenceData().then(function() {
             setupEventListeners();
             loadInventory();
         });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
     } else {
-        setupEventListeners();
-        loadInventory();
+        init();
     }
 })();

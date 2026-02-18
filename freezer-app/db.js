@@ -266,6 +266,58 @@ function getPrintHtml(items) {
 
 function escapeHtml(s) { if (!s) return ''; return String(s).replace(/[&"'<>]/g, c => ({'&':'&amp;','"':'&quot;','\'':'&#39;','<':'&lt;','>':'&gt;'}[c])); }
 
+function replaceAllCategories(names) {
+  db.prepare('DELETE FROM categories').run();
+  let count = 0;
+  const trx = db.transaction((rows) => {
+    for (const name of rows) {
+      if (!name) continue;
+      try { addCategory(name); count++; } catch(e) {}
+    }
+  });
+  trx(names);
+  return count;
+}
+
+function replaceAllFreezers(names) {
+  db.prepare('DELETE FROM freezers').run();
+  let count = 0;
+  const trx = db.transaction((rows) => {
+    for (const name of rows) {
+      if (!name) continue;
+      try { addFreezer(name); count++; } catch(e) {}
+    }
+  });
+  trx(names);
+  return count;
+}
+
+function replaceAllLocations(locs) {
+  db.prepare('DELETE FROM locations').run();
+  let count = 0;
+  const trx = db.transaction((rows) => {
+    for (const loc of rows) {
+      if (!loc.freezer || !loc.shelf) continue;
+      try { addLocation({ freezer: loc.freezer, shelf: loc.shelf, bin: loc.bin || '' }); count++; } catch(e) {}
+    }
+  });
+  trx(locs);
+  return count;
+}
+
+function replaceAllItemNames(names) {
+  db.prepare('DELETE FROM item_names').run();
+  let count = 0;
+  const trx = db.transaction((rows) => {
+    for (const name of rows) {
+      if (!name) continue;
+      try { addItemName(name); count++; } catch(e) {}
+    }
+  });
+  trx(names);
+  return count;
+}
+
 module.exports = {
   // locations
   getLocations, getLocationById, addLocation, updateLocation, deleteLocation,
@@ -277,6 +329,8 @@ module.exports = {
   getCategories, addCategory, deleteCategory,
   // items
   getItems, getItemById, addItem, updateItem, deleteItem, replaceAllItems,
+  // replace-all for admin tables
+  replaceAllCategories, replaceAllFreezers, replaceAllLocations, replaceAllItemNames,
   findOrCreateLocation,
   getPrintHtml,
 };

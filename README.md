@@ -71,6 +71,14 @@ Add `[freezer_inventory]` to any page or post. All visitors can view and edit th
 
 ## Changelog
 
+### 1.3.1
+- Add/edit form dropdowns (freezer, shelf, bin, category) now load live from the API on startup — fixes broken dropdowns in the standalone app
+- Category field changed to a combo-box (free-text + autocomplete) so new categories can be typed directly and are added to the categories list automatically
+- Back arrow on Settings and CSV pages links back to the inventory
+- Notes field widens to fill remaining row space
+- CSV Export: "Include admin tables" checkbox exports everything (inventory, categories, freezers, locations, item names) as a single .zip file
+- CSV Import: accepts .zip files; each file inside the zip is routed to the appropriate table; warning popup lists which tables will be overwritten
+
 ### 1.3.0
 - All inventory table headers now display with a blue background
 - Full-width responsive layout on all pages; tables scroll horizontally on small screens; filter bar and form rows stack on narrow viewports

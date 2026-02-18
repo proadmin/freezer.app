@@ -50,10 +50,15 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f7f7f7;color:#222;margin
 .admin-section{margin-top:24px;padding-top:20px;border-top:2px solid #ddd}
 .admin-section h2{margin-bottom:12px}
 .admin-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.back-link{display:inline-block;margin-bottom:16px;color:#0073aa;text-decoration:none;font-size:13px}
+.back-link:hover{text-decoration:underline}
+.form-group-wide{flex:3}
+.form-group textarea{width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;box-sizing:border-box}
+.freezer-page-footer{text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #eee;font-size:12px;color:#999}
 @media(max-width:768px){
   .filters{flex-wrap:wrap}
   .form-row{flex-wrap:wrap}
-  .form-group{flex:0 0 100%}
+  .form-group,.form-group-wide{flex:0 0 100%}
   .admin-buttons{flex-direction:column}
   .admin-buttons .btn{width:100%;text-align:center}
 }
