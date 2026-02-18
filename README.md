@@ -71,6 +71,13 @@ Add `[freezer_inventory]` to any page or post. All visitors can view and edit th
 
 ## Changelog
 
+### 1.3.0
+- All inventory table headers now display with a blue background
+- Full-width responsive layout on all pages; tables scroll horizontally on small screens; filter bar and form rows stack on narrow viewports
+- Sort ascending/descending by clicking column headers on all Settings admin tables (Categories, Freezers, Locations, Item Names)
+- "Showing x of x Items" stats line is now blue; each category is a clickable link that filters and sorts the inventory by that category
+- Settings and CSV Import/Export buttons moved to a dedicated "Admin" section at the bottom of the main inventory page (below the Add New Item form)
+
 ### 1.2.0
 - Converted WordPress plugin to standalone Node.js app (Express + SQLite)
 - Filter bar now lays out on a single row

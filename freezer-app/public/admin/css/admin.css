@@ -17,15 +17,21 @@ html { scroll-behavior: smooth; }
 
 /* Minimal utility styles to ensure standalone app looks correct */
 body{font-family:Arial,Helvetica,sans-serif;background:#f7f7f7;color:#222;margin:0}
-.freezer-inventory-wrap{max-width:1100px;margin:20px auto;padding:20px}
+.freezer-inventory-wrap{width:100%;max-width:100%;margin:0;padding:15px;box-sizing:border-box}
+.inventory-table-wrap{overflow-x:auto}
 .inventory-table{width:100%;border-collapse:collapse}
 .inventory-table th,.inventory-table td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.inventory-table thead th{background:#0073aa;color:#fff;border-bottom-color:#006799}
+.inventory-table thead th[data-sort]{cursor:pointer}
+.inventory-table thead th.sort-active{background:#006799}
 .btn{display:inline-block;padding:6px 10px;border:1px solid #ccc;background:#fafafa;border-radius:3px;cursor:pointer}
 .btn-primary{background:#0073aa;color:#fff;border-color:#006799}
+.btn-secondary{background:#f0f0f1;color:#2c3338;border-color:#c3c4c7}
+.btn-pdf{background:#1d6b1d;color:#fff;border-color:#185918}
 .form-row{display:flex;gap:12px;margin-bottom:12px}
 .form-group{flex:1}
 .form-group label{display:block;font-size:13px;margin-bottom:6px}
-.form-group input,.form-group select{width:100%;padding:8px;border:1px solid #ddd;border-radius:3px}
+.form-group input,.form-group select{width:100%;padding:8px;border:1px solid #ddd;border-radius:3px;box-sizing:border-box}
 .settings-tabs{display:flex;gap:8px;margin-bottom:12px}
 .settings-tab{padding:8px 12px;background:#f1f1f1;border:1px solid #e3e3e3;border-radius:3px;cursor:pointer}
 .settings-tab.active{background:#fff;border-bottom-color:#fff}
@@ -33,12 +39,22 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f7f7f7;color:#222;margin
 .settings-tab-content.active{display:block}
 .col-actions{text-align:right;width:120px}
 .empty-message{text-align:center;color:#999;padding:12px}
-.btn-secondary{background:#f0f0f1;color:#2c3338;border-color:#c3c4c7}
-.btn-pdf{background:#1d6b1d;color:#fff;border-color:#185918}
 .filters{display:flex;align-items:flex-end;gap:10px;flex-wrap:nowrap}
 .filter-group{flex:1;min-width:0}
 .filter-group label{display:block;font-size:13px;margin-bottom:4px;white-space:nowrap}
 .filter-group input,.filter-group select{width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:3px;box-sizing:border-box}
 .filters>.btn{flex-shrink:0;align-self:flex-end}
 .inventory-footer{display:flex;gap:8px;margin-top:12px;align-items:center}
+#inventoryStats{color:#0073aa;font-size:13px}
+.stat-category-link{color:#0073aa;text-decoration:underline;cursor:pointer}
+.admin-section{margin-top:24px;padding-top:20px;border-top:2px solid #ddd}
+.admin-section h2{margin-bottom:12px}
+.admin-buttons{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:768px){
+  .filters{flex-wrap:wrap}
+  .form-row{flex-wrap:wrap}
+  .form-group{flex:0 0 100%}
+  .admin-buttons{flex-direction:column}
+  .admin-buttons .btn{width:100%;text-align:center}
+}
 

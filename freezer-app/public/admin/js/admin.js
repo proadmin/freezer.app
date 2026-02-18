@@ -875,8 +875,19 @@
         filteredItems.forEach(function(item) {
             catCounts[item.category] = (catCounts[item.category] || 0) + 1;
         });
-        var catSummary = Object.keys(catCounts).map(function(c) { return c + ': ' + catCounts[c]; }).join(' \u2022 ');
-        inventoryStats.innerHTML = '<strong>Showing ' + filteredItems.length + ' of ' + allItems.length + ' items</strong>' + (catSummary ? ' \u2022 ' + catSummary : '');
+        var catLinks = Object.keys(catCounts).sort().map(function(c) {
+            return '<a class="stat-category-link" href="#" data-category="' + escapeHtml(c) + '">' + escapeHtml(c) + ': ' + catCounts[c] + '</a>';
+        }).join(' \u2022 ');
+        inventoryStats.innerHTML = '<strong>Showing ' + filteredItems.length + ' of ' + allItems.length + ' Items</strong>' + (catLinks ? ' \u2022 ' + catLinks : '');
+        inventoryStats.querySelectorAll('.stat-category-link').forEach(function(a) {
+            a.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (categoryFilter) categoryFilter.value = a.dataset.category;
+                sortCol = 'category';
+                sortDir = 'asc';
+                applyFilters();
+            });
+        });
     }
 
     function showError(message) {

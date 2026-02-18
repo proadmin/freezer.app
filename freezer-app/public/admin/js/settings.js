@@ -32,6 +32,63 @@
     var allItemNames = [];
     var editingCell = null;
 
+    var sortState = {
+        categories: { col: null, dir: 'asc' },
+        freezers:   { col: null, dir: 'asc' },
+        locations:  { col: null, dir: 'asc' },
+        'item-names': { col: null, dir: 'asc' }
+    };
+
+    function initSortHeaders() {
+        document.querySelectorAll('th[data-sort][data-table]').forEach(function(th) {
+            th.addEventListener('click', function() {
+                var table = th.dataset.table;
+                var col   = th.dataset.sort;
+                if (!sortState[table]) return;
+                if (sortState[table].col === col) {
+                    sortState[table].dir = sortState[table].dir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortState[table].col = col;
+                    sortState[table].dir = 'asc';
+                }
+                updateSortHeadersForTable(table);
+                if (table === 'categories')  renderCategories();
+                else if (table === 'freezers')   renderFreezers();
+                else if (table === 'locations')  renderLocations();
+                else if (table === 'item-names') renderItemNames();
+            });
+        });
+    }
+
+    function updateSortHeadersForTable(table) {
+        var state = sortState[table];
+        document.querySelectorAll('th[data-table="' + table + '"]').forEach(function(th) {
+            var ind = th.querySelector('.sort-indicator');
+            if (!ind) return;
+            if (state && th.dataset.sort === state.col) {
+                ind.textContent = state.dir === 'asc' ? ' \u25b2' : ' \u25bc';
+                th.classList.add('sort-active');
+            } else {
+                ind.textContent = '';
+                th.classList.remove('sort-active');
+            }
+        });
+    }
+
+    function sortData(data, table) {
+        var state = sortState[table];
+        if (!state || !state.col) return data.slice();
+        var col = state.col;
+        var dir = state.dir === 'asc' ? 1 : -1;
+        return data.slice().sort(function(a, b) {
+            var av = typeof a[col] === 'number' ? a[col] : (a[col] || '').toString().toLowerCase();
+            var bv = typeof b[col] === 'number' ? b[col] : (b[col] || '').toString().toLowerCase();
+            if (av < bv) return -1 * dir;
+            if (av > bv) return  1 * dir;
+            return 0;
+        });
+    }
+
     function setup() {
         if (addFreezerForm) addFreezerForm.addEventListener('submit', handleAddFreezer);
         if (addLocationForm) addLocationForm.addEventListener('submit', handleAddLocation);
@@ -39,6 +96,7 @@
         if (addItemNameForm) addItemNameForm.addEventListener('submit', handleAddItemName);
 
         initTabs();
+        initSortHeaders();
         loadFreezers();
         loadLocations();
         loadCategories();
@@ -103,7 +161,8 @@
     function renderFreezers() {
         if (!freezersBody) return;
         freezersBody.innerHTML = '';
-        if (allFreezers.length === 0) {
+        var data = sortData(allFreezers, 'freezers');
+        if (data.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
             td.colSpan = 3;
@@ -113,7 +172,7 @@
             freezersBody.appendChild(tr);
             return;
         }
-        allFreezers.forEach(function(f) {
+        data.forEach(function(f) {
             var tr = document.createElement('tr');
 
             var tdName = document.createElement('td');
@@ -272,7 +331,8 @@
         if (!locationsBody) return;
         editingCell = null;
         locationsBody.innerHTML = '';
-        if (allLocations.length === 0) {
+        var data = sortData(allLocations, 'locations');
+        if (data.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
             td.colSpan = 5;
@@ -282,7 +342,7 @@
             locationsBody.appendChild(tr);
             return;
         }
-        allLocations.forEach(function(loc) {
+        data.forEach(function(loc) {
             var tr = document.createElement('tr');
 
             var tdF = document.createElement('td');
@@ -360,7 +420,8 @@
     function renderCategories() {
         if (!categoriesBody) return;
         categoriesBody.innerHTML = '';
-        if (allCategories.length === 0) {
+        var data = sortData(allCategories, 'categories');
+        if (data.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
             td.colSpan = 3;
@@ -370,7 +431,7 @@
             categoriesBody.appendChild(tr);
             return;
         }
-        allCategories.forEach(function(c) {
+        data.forEach(function(c) {
             var tr = document.createElement('tr');
 
             var tdName = document.createElement('td');
@@ -437,7 +498,8 @@
     function renderItemNames() {
         if (!itemNamesBody) return;
         itemNamesBody.innerHTML = '';
-        if (allItemNames.length === 0) {
+        var data = sortData(allItemNames, 'item-names');
+        if (data.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
             td.colSpan = 3;
@@ -447,7 +509,7 @@
             itemNamesBody.appendChild(tr);
             return;
         }
-        allItemNames.forEach(function(n) {
+        data.forEach(function(n) {
             var tr = document.createElement('tr');
 
             var tdName = document.createElement('td');
