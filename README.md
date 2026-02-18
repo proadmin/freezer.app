@@ -71,6 +71,10 @@ Add `[freezer_inventory]` to any page or post. All visitors can view and edit th
 
 ## Changelog
 
+### 1.3.4
+- Category names are now inline-editable in the Settings → Categories table (click the name to edit, Enter to save, Escape to cancel)
+- Renaming a category automatically updates the category field on all affected inventory items
+
 ### 1.3.3
 - Freezer names are now inline-editable in the Settings → Freezers table (click the name to edit, Enter to save, Escape to cancel)
 - Renaming a freezer automatically updates all matching Locations and the denormalized location text on affected inventory items

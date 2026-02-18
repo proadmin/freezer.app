@@ -206,6 +206,14 @@ router.delete('/freezers/:id', (req, res) => { try { db.deleteFreezer(parseInt(r
 // Categories
 router.get('/categories', (req, res) => { const cats = db.getCategories(); const counts = {}; db.getItems().forEach(i => counts[i.category] = (counts[i.category]||0)+1); res.json(cats.map(c=>({ ...c, item_count: counts[c.name]||0 }))); });
 router.post('/categories', express.json(), (req, res) => { try { const c = db.addCategory(req.body.name); res.status(201).json(c); } catch (e) { res.status(400).json({ error: e.message }); } });
+router.put('/categories/:id', express.json(), (req, res) => {
+  try {
+    const c = db.updateCategory(parseInt(req.params.id, 10), req.body.name);
+    res.json(c);
+  } catch (e) {
+    res.status(e.message === 'not_found' ? 404 : 400).json({ error: e.message });
+  }
+});
 router.delete('/categories/:id', (req, res) => { try { db.deleteCategory(parseInt(req.params.id,10)); res.json({ message: 'Category deleted' }); } catch (e) { res.status(400).json({ error: e.message }); } });
 
 // Item names

@@ -583,6 +583,57 @@
             .catch(function(err) { showMsg('categories-section', 'error', err.message); });
     }
 
+    function saveCategoryName(id, newName, oldName, tdName) {
+        fetch(API_BASE + '/categories/' + id, {
+            method: 'PUT',
+            headers: headers(),
+            body: JSON.stringify({ name: newName })
+        })
+            .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, json: j }; }); })
+            .then(function(res) {
+                if (!res.ok) throw new Error(res.json.error || 'Failed');
+                var cat = allCategories.find(function(c) { return c.id === id; });
+                if (cat) cat.name = newName;
+                showMsg('categories-section', 'success', 'Category renamed. Inventory items updated.');
+            })
+            .catch(function(err) {
+                if (tdName) tdName.textContent = oldName;
+                showMsg('categories-section', 'error', err.message);
+            });
+    }
+
+    function makeCategoryNameEditable(td, c) {
+        td.classList.add('editable-cell');
+        td.addEventListener('click', function() {
+            if (td.querySelector('input')) return;
+            var orig = c.name;
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'cell-editor';
+            input.value = orig;
+            td.classList.add('editing');
+            td.innerHTML = '';
+            td.appendChild(input);
+            input.focus();
+            input.select();
+
+            function commit() {
+                var val = input.value.trim();
+                td.classList.remove('editing');
+                td.textContent = val || orig;
+                if (val && val !== orig) {
+                    c.name = val;
+                    saveCategoryName(c.id, val, orig, td);
+                }
+            }
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); commit(); }
+                else if (e.key === 'Escape') { td.classList.remove('editing'); td.textContent = orig; }
+            });
+            input.addEventListener('blur', function() { setTimeout(commit, 100); });
+        });
+    }
+
     function deleteCategory(id) {
         if (!confirm('Delete this category?')) return;
         fetch(API_BASE + '/categories/' + id, { method: 'DELETE', headers: headers() })
@@ -627,6 +678,7 @@
 
             var tdName = document.createElement('td');
             tdName.textContent = c.name;
+            makeCategoryNameEditable(tdName, c);
             tr.appendChild(tdName);
 
             var tdCount = document.createElement('td');

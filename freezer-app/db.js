@@ -137,6 +137,16 @@ function getCategories() { return db.prepare('SELECT id,name FROM categories ORD
 function addCategory(name) { const info = db.prepare('INSERT INTO categories (name) VALUES (?)').run(name); return { id: info.lastInsertRowid, name }; }
 function deleteCategory(id) { db.prepare('DELETE FROM categories WHERE id = ?').run(id); return true; }
 
+function updateCategory(id, newName) {
+  if (!newName) throw new Error('missing');
+  const cat = db.prepare('SELECT name FROM categories WHERE id = ?').get(id);
+  if (!cat) throw new Error('not_found');
+  const oldName = cat.name;
+  db.prepare('UPDATE categories SET name = ? WHERE id = ?').run(newName, id);
+  db.prepare('UPDATE items SET category = ? WHERE category = ?').run(newName, oldName);
+  return { id, name: newName };
+}
+
 // Find or create location
 function findOrCreateLocation(freezer, shelf, bin) {
   const row = db.prepare('SELECT id FROM locations WHERE freezer = ? AND shelf = ? AND bin = ?').get(freezer, shelf, bin || '');
@@ -386,7 +396,7 @@ module.exports = {
   // item names
   getItemNames, addItemName, deleteItemName,
   // categories
-  getCategories, addCategory, deleteCategory,
+  getCategories, addCategory, updateCategory, deleteCategory,
   // items
   getItems, getItemById, addItem, updateItem, deleteItem, replaceAllItems,
   // replace-all for admin tables

@@ -1,6 +1,6 @@
 {
   "name": "freezer-inventory-app",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Standalone Freezer Inventory converted from WordPress plugin",
   "main": "server.js",
   "scripts": {
