@@ -71,6 +71,10 @@ Add `[freezer_inventory]` to any page or post. All visitors can view and edit th
 
 ## Changelog
 
+### 1.3.3
+- Freezer names are now inline-editable in the Settings → Freezers table (click the name to edit, Enter to save, Escape to cancel)
+- Renaming a freezer automatically updates all matching Locations and the denormalized location text on affected inventory items
+
 ### 1.3.2
 - CSV import: inventory import now syncs the Freezers table so the add-form freezer dropdown is populated after import
 - CSV import: plain inventory CSV no longer touches admin tables — locations are found-or-created, freezers/categories/item-names are only supplemented, never deleted

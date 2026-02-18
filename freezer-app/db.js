@@ -105,6 +105,19 @@ function addFreezer(name) {
   return { id: info.lastInsertRowid, name };
 }
 
+function updateFreezer(id, newName) {
+  if (!newName) throw new Error('missing');
+  const frz = db.prepare('SELECT name FROM freezers WHERE id = ?').get(id);
+  if (!frz) throw new Error('not_found');
+  const oldName = frz.name;
+  db.prepare('UPDATE freezers SET name = ? WHERE id = ?').run(newName, id);
+  // Cascade: rename the freezer field in all affected locations
+  db.prepare('UPDATE locations SET freezer = ? WHERE freezer = ?').run(newName, oldName);
+  // Keep the denormalized location text in items in sync
+  db.prepare(`UPDATE items SET location = (SELECT l.freezer || ' / ' || l.shelf || ' / ' || l.bin FROM locations l WHERE l.id = items.location_id) WHERE location_id IN (SELECT id FROM locations WHERE freezer = ?)`).run(newName);
+  return { id, name: newName };
+}
+
 function deleteFreezer(id) {
   const frz = db.prepare('SELECT name FROM freezers WHERE id = ?').get(id);
   if (!frz) throw new Error('not_found');
@@ -369,7 +382,7 @@ module.exports = {
   // locations
   getLocations, getLocationById, addLocation, updateLocation, deleteLocation,
   // freezers
-  getFreezers, addFreezer, deleteFreezer,
+  getFreezers, addFreezer, updateFreezer, deleteFreezer,
   // item names
   getItemNames, addItemName, deleteItemName,
   // categories

@@ -193,6 +193,14 @@ router.get('/freezers', (req, res) => {
   res.json(out);
 });
 router.post('/freezers', express.json(), (req, res) => { try { const f = db.addFreezer(req.body.name); res.status(201).json(f); } catch (e) { res.status(400).json({ error: e.message }); } });
+router.put('/freezers/:id', express.json(), (req, res) => {
+  try {
+    const f = db.updateFreezer(parseInt(req.params.id, 10), req.body.name);
+    res.json(f);
+  } catch (e) {
+    res.status(e.message === 'not_found' ? 404 : 400).json({ error: e.message });
+  }
+});
 router.delete('/freezers/:id', (req, res) => { try { db.deleteFreezer(parseInt(req.params.id,10)); res.json({ message: 'Freezer deleted' }); } catch (e) { const code = e.message === 'in_use' ? 409 : 404; res.status(code).json({ error: e.message }); } });
 
 // Categories
