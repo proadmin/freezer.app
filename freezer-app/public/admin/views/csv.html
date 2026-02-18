@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CSV Import / Export</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    window.freezerInventory = { restUrl: '/freezer-inventory/v1', nonce: '', canEdit: true };
+  </script>
+</head>
+<body>
+  <div class="freezer-inventory-wrap">
+    <div class="freezer-inventory-container">
+      <header class="freezer-inventory-header">
+        <h1>CSV Import / Export</h1>
+        <p class="subtitle">Import and export your freezer inventory as CSV files</p>
+      </header>
+
+      <main class="freezer-inventory-main">
+        <section class="form-section">
+          <h2>Export CSV</h2>
+          <p>Download your current inventory as a CSV file.</p>
+          <button type="button" id="downloadCsvBtn" class="btn btn-csv">Export CSV</button>
+        </section>
+
+        <section class="form-section">
+          <h2>Import CSV</h2>
+          <p><strong>Warning:</strong> Importing a CSV will <strong>replace all</strong> current inventory items. This cannot be undone.</p>
+          <div class="csv-columns-table-wrap">
+            <table class="inventory-table csv-columns-table">
+              <thead>
+                <tr><th>Column</th><th>Required</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Name</td><td>Yes</td><td>Item name (e.g., Chicken Breast)</td></tr>
+                <tr><td>Category</td><td>Yes</td><td>Category name</td></tr>
+                <tr><td>Quantity</td><td>Yes</td><td>Numeric quantity (e.g., 4)</td></tr>
+                <tr><td>Unit</td><td>Yes</td><td>lbs, oz, pieces, bags, containers, or packages</td></tr>
+                <tr><td>Freezer</td><td>Yes</td><td>Freezer name (e.g., Main Freezer)</td></tr>
+                <tr><td>Shelf</td><td>Yes</td><td>Shelf name (e.g., Shelf 1)</td></tr>
+                <tr><td>Bin</td><td>No</td><td>Bin name (optional)</td></tr>
+                <tr><td>Preparation</td><td>No</td><td>Raw or Cooked</td></tr>
+                <tr><td>Month Added</td><td>No</td><td>Date in YYYY-MM format</td></tr>
+                <tr><td>Notes</td><td>No</td><td>Any additional notes</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="csv-import-area">
+            <label class="btn btn-import" for="csvFileInput">Choose CSV File to Import</label>
+            <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+            <span id="csvFileName" class="csv-file-name"></span>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="/admin/js/csv.js"></script>
+</body>
+</html>
