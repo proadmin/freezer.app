@@ -148,5 +148,8 @@ defined( 'ABSPATH' ) || exit;
                 </form>
             </section>
         </main>
+        <footer class="freezer-page-footer">
+            Freezer Inventory Manager version <?php echo esc_html( FREEZER_INVENTORY_VERSION ); ?>. Copyright <?php echo esc_html( FREEZER_INVENTORY_YEAR ); ?> by ProAdmin LLC.
+        </footer>
     </div>
 </div>

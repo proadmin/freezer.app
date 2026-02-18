@@ -14,14 +14,16 @@ PATCH=$(echo "$CURRENT" | cut -d. -f3)
 
 NEW_PATCH=$((PATCH + 1))
 NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+NEW_YEAR=$(date +%Y)
 
-echo "Bumping version: $CURRENT -> $NEW_VERSION"
+echo "Bumping version: $CURRENT -> $NEW_VERSION ($NEW_YEAR)"
 
 # Update plugin header
 sed -i '' "s/^ \* Version: .*/ * Version: $NEW_VERSION/" "$PLUGIN_FILE"
 
-# Update PHP constant
+# Update PHP constants
 sed -i '' "s/define( 'FREEZER_INVENTORY_VERSION', '.*'/define( 'FREEZER_INVENTORY_VERSION', '$NEW_VERSION'/" "$PLUGIN_FILE"
+sed -i '' "s/define( 'FREEZER_INVENTORY_YEAR', '.*'/define( 'FREEZER_INVENTORY_YEAR', '$NEW_YEAR'/" "$PLUGIN_FILE"
 
 # Update readme.txt stable tag
 sed -i '' "s/^Stable tag: .*/Stable tag: $NEW_VERSION/" "$README_FILE"

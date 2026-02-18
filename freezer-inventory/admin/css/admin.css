@@ -109,6 +109,8 @@ select.cell-editor { padding: 4px 6px; }
 .error-message { background: #fcf0f1; color: #b32d2e; padding: 12px; border-radius: 4px; margin-bottom: 15px; border: 1px solid #f1aeb5; }
 .success-message { background: #edfaef; color: #00a32a; padding: 12px; border-radius: 4px; margin-bottom: 15px; border: 1px solid #68de7c; }
 
+.freezer-page-footer { text-align: center; font-size: 12px; color: #9ca3af; margin-top: 20px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+
 /* Frontend shortcode — full width, no admin margins */
 .freezer-inventory-wrap.freezer-frontend { margin: 0; padding: 15px; max-width: none; width: 100%; box-sizing: border-box; }
 .freezer-frontend .freezer-inventory-container { max-width: none; }
