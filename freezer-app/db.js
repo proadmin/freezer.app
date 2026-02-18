@@ -238,11 +238,16 @@ function replaceAllItems(items) {
         let location_id = null;
         if (data.freezer && data.shelf) {
           location_id = findOrCreateLocation(data.freezer, data.shelf, data.bin || '');
+          // Keep the freezers table in sync so the add-form dropdown is populated after import
+          try { addFreezer(data.freezer); } catch (e) {}
         }
         let location = data.location || data.freezer_zone || '';
         if (location_id) {
           const loc = getLocationById(location_id);
           if (loc) location = `${loc.freezer} / ${loc.shelf} / ${loc.bin}`;
+        } else if (data.freezer) {
+          // Preserve readable location text even when no matching location row was found
+          location = [data.freezer, data.shelf, data.bin].filter(Boolean).join(' / ');
         }
         insert.run(id, name, category, quantity, unit, location, location_id, data.preparation || '', date, data.notes || '');
         try { addItemName(name); } catch (e) {}
@@ -318,6 +323,48 @@ function replaceAllItemNames(names) {
   return count;
 }
 
+// Bulk deletes
+function deleteItemsBulk(ids) {
+  if (!ids || !ids.length) return 0;
+  const placeholders = ids.map(() => '?').join(',');
+  const info = db.prepare(`DELETE FROM items WHERE id IN (${placeholders})`).run(...ids);
+  return info.changes;
+}
+
+function deleteCategoriesBulk(ids) {
+  if (!ids || !ids.length) return 0;
+  const placeholders = ids.map(() => '?').join(',');
+  const info = db.prepare(`DELETE FROM categories WHERE id IN (${placeholders})`).run(...ids);
+  return info.changes;
+}
+
+function deleteFreezersBulk(ids) {
+  if (!ids || !ids.length) return 0;
+  // Only delete freezers whose name is not referenced by any location
+  const placeholders = ids.map(() => '?').join(',');
+  const info = db.prepare(
+    `DELETE FROM freezers WHERE id IN (${placeholders}) AND name NOT IN (SELECT DISTINCT freezer FROM locations)`
+  ).run(...ids);
+  return info.changes;
+}
+
+function deleteLocationsBulk(ids) {
+  if (!ids || !ids.length) return 0;
+  // Only delete locations not referenced by any item
+  const placeholders = ids.map(() => '?').join(',');
+  const info = db.prepare(
+    `DELETE FROM locations WHERE id IN (${placeholders}) AND id NOT IN (SELECT DISTINCT location_id FROM items WHERE location_id IS NOT NULL)`
+  ).run(...ids);
+  return info.changes;
+}
+
+function deleteItemNamesBulk(ids) {
+  if (!ids || !ids.length) return 0;
+  const placeholders = ids.map(() => '?').join(',');
+  const info = db.prepare(`DELETE FROM item_names WHERE id IN (${placeholders})`).run(...ids);
+  return info.changes;
+}
+
 module.exports = {
   // locations
   getLocations, getLocationById, addLocation, updateLocation, deleteLocation,
@@ -331,6 +378,8 @@ module.exports = {
   getItems, getItemById, addItem, updateItem, deleteItem, replaceAllItems,
   // replace-all for admin tables
   replaceAllCategories, replaceAllFreezers, replaceAllLocations, replaceAllItemNames,
+  // bulk deletes
+  deleteItemsBulk, deleteCategoriesBulk, deleteFreezersBulk, deleteLocationsBulk, deleteItemNamesBulk,
   findOrCreateLocation,
   getPrintHtml,
 };

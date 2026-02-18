@@ -32,7 +32,10 @@
             <h2>Categories</h2>
             <form id="addCategoryForm"><div class="form-row"><div class="form-group"><label for="categoryName">Category Name *</label><input type="text" id="categoryName" name="name" required></div></div><button type="submit" class="btn btn-primary">Add Category</button></form>
           </section>
-          <section class="inventory-section"><div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th data-sort="name" data-table="categories">Category Name <span class="sort-indicator"></span></th><th data-sort="item_count" data-table="categories">Items <span class="sort-indicator"></span></th><th class="col-actions">Actions</th></tr></thead><tbody id="categoriesBody"><tr><td colspan="3" class="empty-message">No categories defined.</td></tr></tbody></table></div></section>
+          <section class="inventory-section">
+            <div id="categoriesBulkBar" class="bulk-bar" style="display:none"><span id="categoriesBulkCount">0 selected</span><button type="button" id="categoriesBulkDeleteBtn" class="btn btn-danger btn-sm">Delete Selected</button><button type="button" id="categoriesBulkDeselectBtn" class="btn btn-secondary btn-sm">Deselect All</button></div>
+            <div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th class="col-check"><input type="checkbox" id="selectAllCategories"></th><th data-sort="name" data-table="categories">Category Name <span class="sort-indicator"></span></th><th data-sort="item_count" data-table="categories">Items <span class="sort-indicator"></span></th><th class="col-actions">Actions</th></tr></thead><tbody id="categoriesBody"><tr><td colspan="4" class="empty-message">No categories defined.</td></tr></tbody></table></div>
+          </section>
         </div>
 
         <!-- Freezers -->
@@ -41,7 +44,10 @@
             <h2>Freezers</h2>
             <form id="addFreezerForm"><div class="form-row"><div class="form-group"><label for="freezerName">Freezer Name *</label><input type="text" id="freezerName" name="name" required></div></div><button type="submit" class="btn btn-primary">Add Freezer</button></form>
           </section>
-          <section class="inventory-section"><div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th data-sort="name" data-table="freezers">Freezer Name <span class="sort-indicator"></span></th><th data-sort="location_count" data-table="freezers">Locations <span class="sort-indicator"></span></th><th class="col-actions">Actions</th></tr></thead><tbody id="freezersBody"><tr><td colspan="3" class="empty-message">No freezers defined.</td></tr></tbody></table></div></section>
+          <section class="inventory-section">
+            <div id="freezersBulkBar" class="bulk-bar" style="display:none"><span id="freezersBulkCount">0 selected</span><button type="button" id="freezersBulkDeleteBtn" class="btn btn-danger btn-sm">Delete Selected</button><button type="button" id="freezersBulkDeselectBtn" class="btn btn-secondary btn-sm">Deselect All</button></div>
+            <div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th class="col-check"><input type="checkbox" id="selectAllFreezers"></th><th data-sort="name" data-table="freezers">Freezer Name <span class="sort-indicator"></span></th><th data-sort="location_count" data-table="freezers">Locations <span class="sort-indicator"></span></th><th class="col-actions">Actions</th></tr></thead><tbody id="freezersBody"><tr><td colspan="4" class="empty-message">No freezers defined.</td></tr></tbody></table></div>
+          </section>
         </div>
 
         <!-- Locations -->
@@ -50,7 +56,10 @@
             <h2>Locations</h2>
             <form id="addLocationForm"><div class="form-row"><div class="form-group"><label for="locFreezer">Freezer *</label><select id="locFreezer" name="freezer" required><option value="">Select freezer</option></select></div><div class="form-group"><label for="locShelf">Shelf *</label><input id="locShelf" name="shelf" required></div><div class="form-group"><label for="locBin">Bin</label><input id="locBin" name="bin"></div></div><button type="submit" class="btn btn-primary">Add Location</button></form>
           </section>
-          <section class="inventory-section"><div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th data-sort="freezer" data-table="locations">Freezer <span class="sort-indicator"></span></th><th data-sort="shelf" data-table="locations">Shelf <span class="sort-indicator"></span></th><th data-sort="bin" data-table="locations">Bin <span class="sort-indicator"></span></th><th data-sort="item_count" data-table="locations">Items <span class="sort-indicator"></span></th><th class="col-actions">Actions</th></tr></thead><tbody id="locationsBody"><tr><td colspan="5" class="empty-message">No locations defined.</td></tr></tbody></table></div></section>
+          <section class="inventory-section">
+            <div id="locationsBulkBar" class="bulk-bar" style="display:none"><span id="locationsBulkCount">0 selected</span><button type="button" id="locationsBulkDeleteBtn" class="btn btn-danger btn-sm">Delete Selected</button><button type="button" id="locationsBulkDeselectBtn" class="btn btn-secondary btn-sm">Deselect All</button></div>
+            <div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th class="col-check"><input type="checkbox" id="selectAllLocations"></th><th data-sort="freezer" data-table="locations">Freezer <span class="sort-indicator"></span></th><th data-sort="shelf" data-table="locations">Shelf <span class="sort-indicator"></span></th><th data-sort="bin" data-table="locations">Bin <span class="sort-indicator"></span></th><th data-sort="item_count" data-table="locations">Items <span class="sort-indicator"></span></th><th class="col-actions">Actions</th></tr></thead><tbody id="locationsBody"><tr><td colspan="6" class="empty-message">No locations defined.</td></tr></tbody></table></div>
+          </section>
         </div>
 
         <!-- Item Names -->
@@ -59,7 +68,10 @@
             <h2>Item Names</h2>
             <form id="addItemNameForm"><div class="form-row"><div class="form-group"><label for="newItemName">Item Name *</label><input id="newItemName" name="name" required></div></div><button type="submit" class="btn btn-primary">Add Item Name</button></form>
           </section>
-          <section class="inventory-section"><div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th data-sort="name" data-table="item-names">Item Name <span class="sort-indicator"></span></th><th data-sort="item_count" data-table="item-names">In Inventory <span class="sort-indicator"></span></th><th class="col-actions">Actions</th></tr></thead><tbody id="itemNamesBody"><tr><td colspan="3" class="empty-message">No item names defined.</td></tr></tbody></table></div></section>
+          <section class="inventory-section">
+            <div id="itemNamesBulkBar" class="bulk-bar" style="display:none"><span id="itemNamesBulkCount">0 selected</span><button type="button" id="itemNamesBulkDeleteBtn" class="btn btn-danger btn-sm">Delete Selected</button><button type="button" id="itemNamesBulkDeselectBtn" class="btn btn-secondary btn-sm">Deselect All</button></div>
+            <div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th class="col-check"><input type="checkbox" id="selectAllItemNames"></th><th data-sort="name" data-table="item-names">Item Name <span class="sort-indicator"></span></th><th data-sort="item_count" data-table="item-names">In Inventory <span class="sort-indicator"></span></th><th class="col-actions">Actions</th></tr></thead><tbody id="itemNamesBody"><tr><td colspan="4" class="empty-message">No item names defined.</td></tr></tbody></table></div>
+          </section>
         </div>
 
       </main>

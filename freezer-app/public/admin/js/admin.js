@@ -105,6 +105,7 @@
     var editingCell = null;
     var sortCol = null;
     var sortDir = 'asc';
+    var selectedItems = new Set();
 
     function setupEventListeners() {
         if (addItemForm) addItemForm.addEventListener('submit', handleAddItem);
@@ -116,6 +117,28 @@
         if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', handleDownloadPdf);
         if (downloadCsvBtn) downloadCsvBtn.addEventListener('click', handleDownloadCsv);
         if (csvFileInput) csvFileInput.addEventListener('change', handleCsvImport);
+
+        // Select-all checkbox
+        var selectAll = document.getElementById('selectAllItems');
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                if (this.checked) {
+                    filteredItems.forEach(function(item) { selectedItems.add(item.id); });
+                } else {
+                    filteredItems.forEach(function(item) { selectedItems.delete(item.id); });
+                }
+                renderInventory();
+            });
+        }
+
+        // Bulk action bar
+        var bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        if (bulkDeleteBtn) bulkDeleteBtn.addEventListener('click', deleteSelectedItems);
+        var bulkDeselectBtn = document.getElementById('bulkDeselectBtn');
+        if (bulkDeselectBtn) bulkDeselectBtn.addEventListener('click', function() {
+            selectedItems.clear();
+            renderInventory();
+        });
 
         // Cascade for add form
         if (itemFreezer) {
@@ -148,6 +171,56 @@
         populateAddCategories();
         populateItemNameList();
         setDefaultDate();
+    }
+
+    function updateBulkBar() {
+        var bar = document.getElementById('inventoryBulkBar');
+        var cnt = document.getElementById('inventoryBulkCount');
+        var selectAll = document.getElementById('selectAllItems');
+        if (bar && cnt) {
+            if (selectedItems.size === 0) {
+                bar.style.display = 'none';
+            } else {
+                bar.style.display = 'flex';
+                cnt.textContent = selectedItems.size + ' item' + (selectedItems.size === 1 ? '' : 's') + ' selected';
+            }
+        }
+        if (selectAll) {
+            var visibleSelected = filteredItems.filter(function(i) { return selectedItems.has(i.id); }).length;
+            if (visibleSelected === 0) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+            } else if (visibleSelected === filteredItems.length) {
+                selectAll.checked = true;
+                selectAll.indeterminate = false;
+            } else {
+                selectAll.checked = false;
+                selectAll.indeterminate = true;
+            }
+        }
+    }
+
+    function deleteSelectedItems() {
+        var ids = Array.from(selectedItems);
+        if (ids.length === 0) return;
+        if (!confirm('Delete ' + ids.length + ' selected item' + (ids.length === 1 ? '' : 's') + '? This cannot be undone.')) return;
+        fetch(API_BASE + '/items/bulk-delete', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ ids: ids })
+        })
+            .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, json: j }; }); })
+            .then(function(res) {
+                if (!res.ok) throw new Error(res.json.error || 'Bulk delete failed');
+                allItems = allItems.filter(function(i) { return !selectedItems.has(i.id); });
+                filteredItems = filteredItems.filter(function(i) { return !selectedItems.has(i.id); });
+                selectedItems.clear();
+                updateFilters();
+                renderInventory();
+                updateStats();
+                showSuccess('Deleted ' + res.json.deleted + ' item' + (res.json.deleted === 1 ? '' : 's') + '.');
+            })
+            .catch(function(err) { showError('Bulk delete failed: ' + err.message); });
     }
 
     function setDefaultDate() {
@@ -367,6 +440,7 @@
                 if (!r.ok) throw new Error('Failed to remove item');
                 allItems = allItems.filter(function(i) { return i.id !== itemId; });
                 filteredItems = filteredItems.filter(function(i) { return i.id !== itemId; });
+                selectedItems.delete(itemId);
                 updateFilters();
                 renderInventory();
                 updateStats();
@@ -825,6 +899,18 @@
         var tr = document.createElement('tr');
         tr.dataset.itemId = item.id;
 
+        var tdCheck = document.createElement('td');
+        tdCheck.className = 'col-check';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = selectedItems.has(item.id);
+        cb.addEventListener('change', function() {
+            if (cb.checked) { selectedItems.add(item.id); } else { selectedItems.delete(item.id); }
+            updateBulkBar();
+        });
+        tdCheck.appendChild(cb);
+        tr.appendChild(tdCheck);
+
         var tdName = document.createElement('td');
         tdName.textContent = item.name || '';
         makeEditable(tdName, item, 'name', 'text');
@@ -875,11 +961,12 @@
         editingCell = null;
         inventoryBody.innerHTML = '';
         updateSortHeaders();
+        updateBulkBar();
 
         if (filteredItems.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
-            td.colSpan = 8;
+            td.colSpan = 9;
             td.className = 'empty-message';
             td.textContent = allItems.length === 0 ? 'No items in freezer. Add your first item below!' : 'No items found. Try adjusting your filters.';
             tr.appendChild(td);

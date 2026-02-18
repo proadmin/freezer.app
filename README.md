@@ -71,6 +71,12 @@ Add `[freezer_inventory]` to any page or post. All visitors can view and edit th
 
 ## Changelog
 
+### 1.3.2
+- CSV import: inventory import now syncs the Freezers table so the add-form freezer dropdown is populated after import
+- CSV import: plain inventory CSV no longer touches admin tables — locations are found-or-created, freezers/categories/item-names are only supplemented, never deleted
+- Bulk delete for the inventory table: checkboxes per row, select-all in header, bulk bar with count and "Delete Selected" / "Deselect All"
+- Bulk delete for all Settings tables (Categories, Freezers, Locations, Item Names): same checkbox + bulk-bar pattern; in-use freezers/locations are skipped and the skipped count is reported
+
 ### 1.3.1
 - Add/edit form dropdowns (freezer, shelf, bin, category) now load live from the API on startup — fixes broken dropdowns in the standalone app
 - Category field changed to a combo-box (free-text + autocomplete) so new categories can be typed directly and are added to the categories list automatically

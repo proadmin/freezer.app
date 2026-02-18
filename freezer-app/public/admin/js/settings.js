@@ -32,6 +32,46 @@
     var allItemNames = [];
     var editingCell = null;
 
+    var selectedCategories = new Set();
+    var selectedFreezers = new Set();
+    var selectedLocations = new Set();
+    var selectedItemNames = new Set();
+
+    // --- Reusable bulk bar manager ---
+    function updateBulkBar(barId, countId, selectAllId, selected, allData) {
+        var bar = document.getElementById(barId);
+        var cnt = document.getElementById(countId);
+        var sa  = document.getElementById(selectAllId);
+        if (bar && cnt) {
+            if (selected.size === 0) {
+                bar.style.display = 'none';
+            } else {
+                bar.style.display = 'flex';
+                cnt.textContent = selected.size + ' item' + (selected.size === 1 ? '' : 's') + ' selected';
+            }
+        }
+        if (sa) {
+            if (selected.size === 0) { sa.checked = false; sa.indeterminate = false; }
+            else if (selected.size === allData.length) { sa.checked = true; sa.indeterminate = false; }
+            else { sa.checked = false; sa.indeterminate = true; }
+        }
+    }
+
+    function wireSelectAll(selectAllId, selected, getData, rerender) {
+        var sa = document.getElementById(selectAllId);
+        if (!sa) return;
+        sa.addEventListener('change', function() {
+            if (this.checked) { getData().forEach(function(r) { selected.add(r.id); }); }
+            else { selected.clear(); }
+            rerender();
+        });
+    }
+
+    function wireBulkDeselect(deselectBtnId, selected, rerender) {
+        var btn = document.getElementById(deselectBtnId);
+        if (btn) btn.addEventListener('click', function() { selected.clear(); rerender(); });
+    }
+
     var sortState = {
         categories: { col: null, dir: 'asc' },
         freezers:   { col: null, dir: 'asc' },
@@ -89,11 +129,69 @@
         });
     }
 
+    function bulkDeleteRequest(endpoint, ids, reloadFn, sectionId, selected) {
+        fetch(API_BASE + endpoint, {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ ids: ids.map(Number) })
+        })
+            .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, json: j }; }); })
+            .then(function(res) {
+                if (!res.ok) throw new Error(res.json.error || 'Delete failed');
+                selected.clear();
+                reloadFn();
+                var del = res.json.deleted;
+                var skip = res.json.skipped || 0;
+                var msg = 'Deleted ' + del + '.';
+                if (skip > 0) msg += ' ' + skip + ' skipped (in use).';
+                showMsg(sectionId, 'success', msg);
+            })
+            .catch(function(err) { showMsg(sectionId, 'error', err.message); });
+    }
+
     function setup() {
         if (addFreezerForm) addFreezerForm.addEventListener('submit', handleAddFreezer);
         if (addLocationForm) addLocationForm.addEventListener('submit', handleAddLocation);
         if (addCategoryForm) addCategoryForm.addEventListener('submit', handleAddCategory);
         if (addItemNameForm) addItemNameForm.addEventListener('submit', handleAddItemName);
+
+        wireSelectAll('selectAllCategories', selectedCategories, function() { return sortData(allCategories, 'categories'); }, renderCategories);
+        wireSelectAll('selectAllFreezers',   selectedFreezers,   function() { return sortData(allFreezers,   'freezers');   }, renderFreezers);
+        wireSelectAll('selectAllLocations',  selectedLocations,  function() { return sortData(allLocations,  'locations');  }, renderLocations);
+        wireSelectAll('selectAllItemNames',  selectedItemNames,  function() { return sortData(allItemNames,  'item-names'); }, renderItemNames);
+
+        wireBulkDeselect('categoriesBulkDeselectBtn', selectedCategories, renderCategories);
+        wireBulkDeselect('freezersBulkDeselectBtn',   selectedFreezers,   renderFreezers);
+        wireBulkDeselect('locationsBulkDeselectBtn',  selectedLocations,  renderLocations);
+        wireBulkDeselect('itemNamesBulkDeselectBtn',  selectedItemNames,  renderItemNames);
+
+        var catBulkDel = document.getElementById('categoriesBulkDeleteBtn');
+        if (catBulkDel) catBulkDel.addEventListener('click', function() {
+            var ids = Array.from(selectedCategories);
+            if (!ids.length || !confirm('Delete ' + ids.length + ' categor' + (ids.length === 1 ? 'y' : 'ies') + '?')) return;
+            bulkDeleteRequest('/categories/bulk-delete', ids, loadCategories, 'categories-section', selectedCategories);
+        });
+
+        var frzBulkDel = document.getElementById('freezersBulkDeleteBtn');
+        if (frzBulkDel) frzBulkDel.addEventListener('click', function() {
+            var ids = Array.from(selectedFreezers);
+            if (!ids.length || !confirm('Delete ' + ids.length + ' freezer' + (ids.length === 1 ? '' : 's') + '? In-use freezers will be skipped.')) return;
+            bulkDeleteRequest('/freezers/bulk-delete', ids, loadFreezers, 'freezers-section', selectedFreezers);
+        });
+
+        var locBulkDel = document.getElementById('locationsBulkDeleteBtn');
+        if (locBulkDel) locBulkDel.addEventListener('click', function() {
+            var ids = Array.from(selectedLocations);
+            if (!ids.length || !confirm('Delete ' + ids.length + ' location' + (ids.length === 1 ? '' : 's') + '? In-use locations will be skipped.')) return;
+            bulkDeleteRequest('/locations/bulk-delete', ids, loadLocations, 'locations-section', selectedLocations);
+        });
+
+        var inameBulkDel = document.getElementById('itemNamesBulkDeleteBtn');
+        if (inameBulkDel) inameBulkDel.addEventListener('click', function() {
+            var ids = Array.from(selectedItemNames);
+            if (!ids.length || !confirm('Delete ' + ids.length + ' item name' + (ids.length === 1 ? '' : 's') + '?')) return;
+            bulkDeleteRequest('/item-names/bulk-delete', ids, loadItemNames, 'item-names-section', selectedItemNames);
+        });
 
         initTabs();
         initSortHeaders();
@@ -162,10 +260,11 @@
         if (!freezersBody) return;
         freezersBody.innerHTML = '';
         var data = sortData(allFreezers, 'freezers');
+        updateBulkBar('freezersBulkBar', 'freezersBulkCount', 'selectAllFreezers', selectedFreezers, data);
         if (data.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
-            td.colSpan = 3;
+            td.colSpan = 4;
             td.className = 'empty-message';
             td.textContent = 'No freezers defined.';
             tr.appendChild(td);
@@ -174,6 +273,18 @@
         }
         data.forEach(function(f) {
             var tr = document.createElement('tr');
+
+            var tdCb = document.createElement('td');
+            tdCb.className = 'col-check';
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = selectedFreezers.has(f.id);
+            cb.addEventListener('change', function() {
+                if (cb.checked) selectedFreezers.add(f.id); else selectedFreezers.delete(f.id);
+                updateBulkBar('freezersBulkBar', 'freezersBulkCount', 'selectAllFreezers', selectedFreezers, sortData(allFreezers, 'freezers'));
+            });
+            tdCb.appendChild(cb);
+            tr.appendChild(tdCb);
 
             var tdName = document.createElement('td');
             tdName.textContent = f.name;
@@ -332,10 +443,11 @@
         editingCell = null;
         locationsBody.innerHTML = '';
         var data = sortData(allLocations, 'locations');
+        updateBulkBar('locationsBulkBar', 'locationsBulkCount', 'selectAllLocations', selectedLocations, data);
         if (data.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
-            td.colSpan = 5;
+            td.colSpan = 6;
             td.className = 'empty-message';
             td.textContent = 'No locations defined.';
             tr.appendChild(td);
@@ -344,6 +456,18 @@
         }
         data.forEach(function(loc) {
             var tr = document.createElement('tr');
+
+            var tdCb = document.createElement('td');
+            tdCb.className = 'col-check';
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = selectedLocations.has(loc.id);
+            cb.addEventListener('change', function() {
+                if (cb.checked) selectedLocations.add(loc.id); else selectedLocations.delete(loc.id);
+                updateBulkBar('locationsBulkBar', 'locationsBulkCount', 'selectAllLocations', selectedLocations, sortData(allLocations, 'locations'));
+            });
+            tdCb.appendChild(cb);
+            tr.appendChild(tdCb);
 
             var tdF = document.createElement('td');
             tdF.textContent = loc.freezer;
@@ -421,10 +545,11 @@
         if (!categoriesBody) return;
         categoriesBody.innerHTML = '';
         var data = sortData(allCategories, 'categories');
+        updateBulkBar('categoriesBulkBar', 'categoriesBulkCount', 'selectAllCategories', selectedCategories, data);
         if (data.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
-            td.colSpan = 3;
+            td.colSpan = 4;
             td.className = 'empty-message';
             td.textContent = 'No categories defined.';
             tr.appendChild(td);
@@ -433,6 +558,18 @@
         }
         data.forEach(function(c) {
             var tr = document.createElement('tr');
+
+            var tdCb = document.createElement('td');
+            tdCb.className = 'col-check';
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = selectedCategories.has(c.id);
+            cb.addEventListener('change', function() {
+                if (cb.checked) selectedCategories.add(c.id); else selectedCategories.delete(c.id);
+                updateBulkBar('categoriesBulkBar', 'categoriesBulkCount', 'selectAllCategories', selectedCategories, sortData(allCategories, 'categories'));
+            });
+            tdCb.appendChild(cb);
+            tr.appendChild(tdCb);
 
             var tdName = document.createElement('td');
             tdName.textContent = c.name;
@@ -499,10 +636,11 @@
         if (!itemNamesBody) return;
         itemNamesBody.innerHTML = '';
         var data = sortData(allItemNames, 'item-names');
+        updateBulkBar('itemNamesBulkBar', 'itemNamesBulkCount', 'selectAllItemNames', selectedItemNames, data);
         if (data.length === 0) {
             var tr = document.createElement('tr');
             var td = document.createElement('td');
-            td.colSpan = 3;
+            td.colSpan = 4;
             td.className = 'empty-message';
             td.textContent = 'No item names defined.';
             tr.appendChild(td);
@@ -511,6 +649,18 @@
         }
         data.forEach(function(n) {
             var tr = document.createElement('tr');
+
+            var tdCb = document.createElement('td');
+            tdCb.className = 'col-check';
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = selectedItemNames.has(n.id);
+            cb.addEventListener('change', function() {
+                if (cb.checked) selectedItemNames.add(n.id); else selectedItemNames.delete(n.id);
+                updateBulkBar('itemNamesBulkBar', 'itemNamesBulkCount', 'selectAllItemNames', selectedItemNames, sortData(allItemNames, 'item-names'));
+            });
+            tdCb.appendChild(cb);
+            tr.appendChild(tdCb);
 
             var tdName = document.createElement('td');
             tdName.textContent = n.name;

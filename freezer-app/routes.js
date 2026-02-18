@@ -205,6 +205,44 @@ router.get('/item-names', (req, res) => { const names = db.getItemNames(); const
 router.post('/item-names', express.json(), (req, res) => { try { const n = db.addItemName(req.body.name); res.status(201).json(n); } catch (e) { res.status(400).json({ error: e.message }); } });
 router.delete('/item-names/:id', (req, res) => { try { db.deleteItemName(parseInt(req.params.id,10)); res.json({ message: 'Item name deleted' }); } catch (e) { res.status(400).json({ error: e.message }); } });
 
+// Bulk deletes
+router.post('/items/bulk-delete', express.json(), (req, res) => {
+  const ids = req.body && req.body.ids;
+  if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids required' });
+  const count = db.deleteItemsBulk(ids);
+  res.json({ deleted: count });
+});
+
+router.post('/categories/bulk-delete', express.json(), (req, res) => {
+  const ids = req.body && req.body.ids;
+  if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids required' });
+  const count = db.deleteCategoriesBulk(ids.map(Number));
+  res.json({ deleted: count });
+});
+
+router.post('/freezers/bulk-delete', express.json(), (req, res) => {
+  const ids = req.body && req.body.ids;
+  if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids required' });
+  const deleted = db.deleteFreezersBulk(ids.map(Number));
+  const skipped = ids.length - deleted;
+  res.json({ deleted, skipped });
+});
+
+router.post('/locations/bulk-delete', express.json(), (req, res) => {
+  const ids = req.body && req.body.ids;
+  if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids required' });
+  const deleted = db.deleteLocationsBulk(ids.map(Number));
+  const skipped = ids.length - deleted;
+  res.json({ deleted, skipped });
+});
+
+router.post('/item-names/bulk-delete', express.json(), (req, res) => {
+  const ids = req.body && req.body.ids;
+  if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids required' });
+  const count = db.deleteItemNamesBulk(ids.map(Number));
+  res.json({ deleted: count });
+});
+
 // PDF HTML
 router.get('/inventory/pdf', (req, res) => { const items = db.getItems(); const html = db.getPrintHtml(items); res.json({ html }); });
 
