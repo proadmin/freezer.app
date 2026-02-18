@@ -1,31 +1,26 @@
 # Freezer Inventory Manager
 
-A WordPress plugin to manage your freezer inventory with an editable spreadsheet table, managed locations, and PDF/CSV export.
+A WordPress plugin for tracking what's in your freezers. Items live in a spreadsheet-style table you can edit directly in the browser.
 
 ## Features
 
-- **Editable table** — click any cell to edit it in place, like a spreadsheet
-- **Editable dates** — inline month picker for the Month Added column
-- **Keyboard navigation** — Tab between cells, Enter to move down, Escape to cancel
-- **Add items** with name, category, quantity, unit, raw/cooked, location (freezer/shelf/bin), month added, and notes
-- **Cascading location dropdowns** — freezer → shelf → bin on add form, filters, and inline editing; bin is optional
-- **Managed freezers** — add/delete freezer names from the Settings page
-- **Managed locations** — add/delete freezer/shelf/bin combinations from the Settings page
-- **Managed categories** — add/delete category presets from the Settings page; new categories auto-created on import
-- **Item name autocomplete** — dropdown learns new names as you add items; manage the list from the Settings page
-- **Delete protection** — freezers, locations, and item names can't be deleted while in use
-- **Auto-remove** items when quantity reaches zero
-- **Raw / Cooked field** — required preparation status with filtering support
-- **Sortable columns** — click any column header to sort ascending or descending
-- **No caching** — shortcode pages and REST API responses are served fresh every time
-- **Add Item button** — jump directly to the add form from the top of the inventory panel
-- **Search and filter** by name, category, freezer, and raw/cooked — search field takes at least 1/3 of the row width
-- **CSV import/export** — dedicated admin page with column documentation and example CSV
-- **PDF export** — print-friendly view in a new tab
-- **Frontend shortcode** — embed on any page with `[freezer_inventory]` — all visitors can view and edit (without CSV functions)
-- **Fully responsive** — uses full available width on mobile, tablet, and desktop
-- **Automatic updates** — checks GitHub releases for new versions via the WordPress Plugins page
-- **Admin pages** — require `manage_options` capability
+The inventory table works like a spreadsheet: click any cell to edit it. Tab moves between cells in a row, Enter moves down a column, and Escape cancels. Month cells use an inline month picker. An "Add Item" button at the top of the inventory panel jumps straight to the add form.
+
+Each item has a name, category, quantity, unit, raw/cooked status, location (freezer/shelf/bin), month added, and notes. Items are deleted automatically when the quantity hits zero.
+
+Locations use cascading dropdowns: pick a freezer, then a shelf, then an optional bin. The lists of freezers, shelves, bins, and categories are managed from the Settings page. Freezers, locations, and item names can't be deleted while any inventory item references them.
+
+The item name field autocompletes from a list that grows as you add new items.
+
+Columns are sortable. You can filter by name, category, freezer, and raw/cooked status. The layout scales to full browser width on any screen size.
+
+Other features:
+- CSV import and export (dedicated admin page with column docs and a downloadable example file)
+- PDF export (opens a print-friendly view in a new tab)
+- `[freezer_inventory]` shortcode embeds a read/write inventory view on any public page, no login required (no CSV functions on frontend)
+- Automatic updates from GitHub releases, visible on the WordPress Plugins page
+- Admin pages require `manage_options`
+- Shortcode pages and REST API responses are not cached
 
 ## Installation
 
@@ -34,17 +29,17 @@ A WordPress plugin to manage your freezer inventory with an editable spreadsheet
 3. Upload the zip and activate
 4. Find "Freezer Inventory" in the admin sidebar
 5. Set up freezers, locations, categories, and item names under Freezer Inventory > Settings
-6. Start adding inventory items
+6. Start adding items
 
-### Frontend usage
+### Frontend
 
-Add `[freezer_inventory]` to any page or post. All visitors can view and edit the inventory — no login required.
+Add `[freezer_inventory]` to any page or post. All visitors can view and edit the inventory without logging in.
 
-## Admin Pages
+## Admin pages
 
-- **Freezer Inventory** — main inventory table with add form, filters, and PDF export
-- **Settings** — tabbed page to manage categories, freezers, locations, and item names
-- **CSV Import / Export** — export inventory as CSV, import from CSV with column docs and example file
+- **Freezer Inventory**: main inventory table with add form, filters, and PDF export
+- **Settings**: manage categories, freezers, locations, and item names (tabbed)
+- **CSV Import / Export**: export or import inventory with column docs and an example CSV
 
 ## Requirements
 
