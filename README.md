@@ -46,6 +46,17 @@ Add `[freezer_inventory]` to any page or post. All visitors can view and edit th
 - WordPress 5.0+
 - PHP 7.4+
 
+## Changelog
+
+### 1.1.0
+- Rewrote README for clarity
+- Added .gitignore
+
+### 1.0.5
+- Expanded filter inputs to fill available browser width
+- Synced frontend shortcode with current admin page layout
+- Disabled caching for shortcode pages and REST API responses
+
 ## License
 
 GPL v2 or later

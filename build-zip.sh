@@ -28,6 +28,6 @@ sed -i '' "s/^Stable tag: .*/Stable tag: $NEW_VERSION/" "$README_FILE"
 
 # Rebuild zip
 rm -f freezer-inventory.zip
-zip -r freezer-inventory.zip freezer-inventory/
+zip -r freezer-inventory.zip freezer-inventory/ -x "*.DS_Store"
 
 echo "Built freezer-inventory.zip (v$NEW_VERSION)"
