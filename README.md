@@ -48,6 +48,9 @@ Add `[freezer_inventory]` to any page or post. All visitors can view and edit th
 
 ## Changelog
 
+### 1.1.1
+- Added version and copyright footer to inventory pages
+
 ### 1.1.0
 - Rewrote README for clarity
 - Added .gitignore
