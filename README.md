@@ -1,6 +1,6 @@
 # Freezer Inventory Manager
 
-A WordPress plugin for tracking what's in your freezers. Items live in a spreadsheet-style table you can edit directly in the browser.
+Track what's in your freezers with an editable spreadsheet-style table. Available as a **standalone Node.js app** and as a **WordPress plugin**.
 
 ## Features
 
@@ -12,17 +12,46 @@ Locations use cascading dropdowns: pick a freezer, then a shelf, then an optiona
 
 The item name field autocompletes from a list that grows as you add new items.
 
-Columns are sortable. You can filter by name, category, freezer, and raw/cooked status. The layout scales to full browser width on any screen size.
+Columns are sortable. You can filter by name, category, freezer, and raw/cooked status — all filters are on one row. The layout scales to full browser width on any screen size.
 
 Other features:
-- CSV import and export (dedicated admin page with column docs and a downloadable example file)
+- CSV import and export (dedicated page with column docs and a downloadable example file)
 - PDF export (opens a print-friendly view in a new tab)
-- `[freezer_inventory]` shortcode embeds a read/write inventory view on any public page, no login required (no CSV functions on frontend)
-- Automatic updates from GitHub releases, visible on the WordPress Plugins page
-- Admin pages require `manage_options`
-- Shortcode pages and REST API responses are not cached
+- Settings and CSV pages linked from the main inventory page footer
 
-## Installation
+## Node.js App
+
+The standalone app lives in `freezer-app/`. It uses Express and SQLite — no external database required.
+
+### Installation
+
+```bash
+cd freezer-app
+npm install
+npm start        # production, http://localhost:3000
+npm run dev      # development — auto-restarts on file changes
+```
+
+Set `PORT` to override the default port:
+```bash
+PORT=8080 npm start
+```
+
+The SQLite database is created automatically at `freezer-app/data/freezer.db` on first run.
+
+### Pages
+
+- `/` → redirects to `/admin`
+- `/admin` — main inventory table with filters, add form, and PDF export
+- `/admin/settings` — manage freezers, locations, categories, and item names
+- `/admin/csv` — CSV import and export
+- `/health` — health check endpoint, returns `{"status":"ok"}`
+
+## WordPress Plugin
+
+The plugin lives in `freezer-inventory/`. It stores data in the WordPress database and adds an admin sidebar menu.
+
+### Installation
 
 1. Download `freezer-inventory.zip`
 2. In WordPress, go to Plugins > Add New > Upload Plugin
@@ -31,22 +60,22 @@ Other features:
 5. Set up freezers, locations, categories, and item names under Freezer Inventory > Settings
 6. Start adding items
 
-### Frontend
+### Frontend shortcode
 
-Add `[freezer_inventory]` to any page or post. All visitors can view and edit the inventory without logging in.
+Add `[freezer_inventory]` to any page or post. All visitors can view and edit the inventory without logging in (CSV import/export not available on frontend).
 
-## Admin pages
-
-- **Freezer Inventory**: main inventory table with add form, filters, and PDF export
-- **Settings**: manage categories, freezers, locations, and item names (tabbed)
-- **CSV Import / Export**: export or import inventory with column docs and an example CSV
-
-## Requirements
+### Requirements
 
 - WordPress 5.0+
 - PHP 7.4+
 
 ## Changelog
+
+### 1.2.0
+- Converted WordPress plugin to standalone Node.js app (Express + SQLite)
+- Filter bar now lays out on a single row
+- Settings and CSV Import / Export linked from buttons in the inventory footer
+- Node.js dependency updates: better-sqlite3 v11, multer v2 (CVE fix), nodemon dev server
 
 ### 1.1.1
 - Added version and copyright footer to inventory pages

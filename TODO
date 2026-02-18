@@ -1,1 +1,3 @@
 - Update README.md and readme.txt when we commit.
+- Place the Search:, Category:, Freezer:, Raw / Cooked: fields and the Clear Filters button on a single line.
+- Add the Settings and CSV Import / Export functionality from the plugin backend to the node.js application and link them to buttons at the bottom if the page.

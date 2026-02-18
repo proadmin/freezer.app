@@ -1,8 +1,5 @@
 const express = require('express');
 const path = require('path');
-const bodyParser = express.json;
-const multer = require('multer');
-const upload = multer();
 const PORT = process.env.PORT || 3000;
 
 const db = require('./db');

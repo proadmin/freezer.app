@@ -33,4 +33,12 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f7f7f7;color:#222;margin
 .settings-tab-content.active{display:block}
 .col-actions{text-align:right;width:120px}
 .empty-message{text-align:center;color:#999;padding:12px}
+.btn-secondary{background:#f0f0f1;color:#2c3338;border-color:#c3c4c7}
+.btn-pdf{background:#1d6b1d;color:#fff;border-color:#185918}
+.filters{display:flex;align-items:flex-end;gap:10px;flex-wrap:nowrap}
+.filter-group{flex:1;min-width:0}
+.filter-group label{display:block;font-size:13px;margin-bottom:4px;white-space:nowrap}
+.filter-group input,.filter-group select{width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:3px;box-sizing:border-box}
+.filters>.btn{flex-shrink:0;align-self:flex-end}
+.inventory-footer{display:flex;gap:8px;margin-top:12px;align-items:center}
 
