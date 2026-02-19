@@ -1,6 +1,6 @@
 # Freezer Inventory Manager
 
-Track what's in your freezers with an editable spreadsheet-style table. Available as a **standalone Node.js app** and as a **WordPress plugin**.
+Track what's in your freezers with an editable spreadsheet-style table. Built on Node.js, Express, and SQLite — no external database required.
 
 ## Features
 
@@ -19,11 +19,9 @@ Other features:
 - PDF export (opens a print-friendly view in a new tab)
 - Settings and CSV pages linked from the main inventory page footer
 
-## Node.js App
+## Installation
 
-The standalone app lives in `freezer-app/`. It uses Express and SQLite — no external database required.
-
-### Installation
+The app lives in `freezer-app/`.
 
 ```bash
 cd freezer-app
@@ -39,7 +37,7 @@ PORT=8080 npm start
 
 The SQLite database is created automatically at `freezer-app/data/freezer.db` on first run.
 
-### Pages
+## Pages
 
 - `/` → redirects to `/admin`
 - `/admin` — main inventory table with filters, add form, and PDF export
@@ -47,39 +45,16 @@ The SQLite database is created automatically at `freezer-app/data/freezer.db` on
 - `/admin/csv` — CSV import and export
 - `/health` — health check endpoint, returns `{"status":"ok"}`
 
-## WordPress Plugin
+## Requirements
 
-The plugin lives in `freezer-inventory/`. It stores data in the WordPress database and adds an admin sidebar menu.
-
-### Installation
-
-1. Download `freezer-inventory.zip`
-2. In WordPress, go to Plugins > Add New > Upload Plugin
-3. Upload the zip and activate
-4. Find "Freezer Inventory" in the admin sidebar
-5. Set up freezers, locations, categories, and item names under Freezer Inventory > Settings
-6. Start adding items
-
-### Frontend shortcode
-
-Add `[freezer_inventory]` to any page or post. All visitors can view and edit the inventory without logging in (CSV import/export not available on frontend).
-
-### Requirements
-
-- WordPress 5.0+
-- PHP 7.4+
+- Node.js 18+
+- npm
 
 ## Changelog
 
 ### 2.0.0
-
-### 1.3.4
-- Category names are now inline-editable in the Settings → Categories table (click the name to edit, Enter to save, Escape to cancel)
-- Renaming a category automatically updates the category field on all affected inventory items
-
-### 1.3.3
-- Freezer names are now inline-editable in the Settings → Freezers table (click the name to edit, Enter to save, Escape to cancel)
-- Renaming a freezer automatically updates all matching Locations and the denormalized location text on affected inventory items
+- Removed WordPress plugin; app is now standalone Node.js only
+- Freezer and category names are inline-editable in Settings; renaming cascades to all affected inventory items
 
 ### 1.3.2
 - CSV import: inventory import now syncs the Freezers table so the add-form freezer dropdown is populated after import
@@ -107,18 +82,6 @@ Add `[freezer_inventory]` to any page or post. All visitors can view and edit th
 - Filter bar now lays out on a single row
 - Settings and CSV Import / Export linked from buttons in the inventory footer
 - Node.js dependency updates: better-sqlite3 v11, multer v2 (CVE fix), nodemon dev server
-
-### 1.1.1
-- Added version and copyright footer to inventory pages
-
-### 1.1.0
-- Rewrote README for clarity
-- Added .gitignore
-
-### 1.0.5
-- Expanded filter inputs to fill available browser width
-- Synced frontend shortcode with current admin page layout
-- Disabled caching for shortcode pages and REST API responses
 
 ## License
 
